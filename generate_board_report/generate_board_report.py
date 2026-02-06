@@ -7,9 +7,14 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 # 3rd party library
-from gql import gql, Client
-from gql.transport.requests import RequestsHTTPTransport
-from gql.transport.exceptions import TransportQueryError
+try:
+    from gql import gql, Client
+    from gql.transport.requests import RequestsHTTPTransport
+    from gql.transport.exceptions import TransportQueryError
+except ImportError:
+    print("Error: Missing dependencies.")
+    print("Please run: pip install gql requests")
+    sys.exit(1)
 
 # Setup Logger
 logger = logging.getLogger(__name__)
@@ -66,7 +71,7 @@ def fetch_raw_items(org, project_number):
               updatedAt # When the CARD was moved/edited
               createdAt # When the CARD was added to board
               
-              fieldValues(first: 10) {
+              fieldValues(first: 20) {
                 nodes {
                   ... on ProjectV2ItemFieldSingleSelectValue {
                     name
@@ -282,7 +287,7 @@ def process_items(items, start_time, end_time):
         # 4. Board Moves (Implicit)
         if not changes:
              if start_utc <= board_updated <= end_utc:
-                changes.append("🔄 Board Move / Status Update")
+                changes.append("🔄 Board Item Updated")
 
         # Determine Board Status
         status = "No Status"
@@ -298,7 +303,8 @@ def process_items(items, start_time, end_time):
                 'url': content['url'],
                 'state': content['state'],
                 'status': status,
-                'changes': changes
+                'changes': changes,
+                'board_updated': board_updated
             })
 
     return impacted
@@ -326,17 +332,22 @@ def generate_markdown(items, start_dt, end_dt, org, project_number, output_path)
         lines.append("\n| Issue | Board Status | Actions Taken |")
         lines.append("|---|---|---|")
 
-        # Sort: Repo -> Number
-        items.sort(key=lambda x: (x['repo'], x['number']))
+        # Sort: Chronological order (oldest first)
+        items.sort(key=lambda x: x['board_updated'])
 
         for item in items:
             repo = item['repo']
                         
-            # New format: Title first, then Repo/Number link
-            issue_cell = f"**{item['title']}**<br>[{repo}#{item['number']}]({item['url']})"
+            # prevent table/formatting breakage from titles like "<QHTTPX>"" in issue titles 
+            # "| **[Sandbox] <QHTTPX>**<br>[sandbox#453](https://github.com/cncf/sandbox/issues/453) |"
+
+            safe_title = item['title'].replace('|', '&#124;').replace('<', '&lt;').replace('>', '&gt;')
+            safe_status = item['status'].replace('|', '&#124;').replace('<', '&lt;').replace('>', '&gt;')
+
+            issue_cell = f"**{safe_title}**<br>[{repo}#{item['number']}]({item['url']})"
             
-            change_log = "<br>".join(item['changes'])
-            lines.append(f"| {issue_cell} | **{item['status']}** | {change_log} |")
+            change_log = "<br>".join(item['changes']).replace('|', '&#124;')
+            lines.append(f"| {issue_cell} | **{safe_status}** | {change_log} |")
 
     with open(output_path, 'w', encoding='utf-8') as f:
         f.write("\n".join(lines))
@@ -398,6 +409,7 @@ if __name__ == "__main__":
 
     # Calculate Times
     start_dt = parse_time_arg(args.start, target_date)
+    logger.info(f"Interpreting input time '{args.start}' as {start_dt.tzname()} time.")
     
     if args.end:
         end_dt = parse_time_arg(args.end, target_date)
