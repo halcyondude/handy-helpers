@@ -312,11 +312,13 @@ def generate_markdown(items, start_dt, end_dt, org, project_number, output_path)
     date_str = start_dt.strftime('%Y-%m-%d')
 
     lines = []
-    lines.append(f"# Meeting Change Log")
+    lines.append(f"# Project Board Change Log")
+    lines.append(f"")
     lines.append(f"**Date:** {date_str}")
     lines.append(f"**Window:** {start_str} to {end_str}")
-    lines.append(f"**Project:** [CNCF Project #{project_number}](https://github.com/orgs/{org}/projects/{project_number})")
-    
+    lines.append(f"**Project:** [{org} Project #{project_number}](https://github.com/orgs/{org}/projects/{project_number})")
+    lines.append(f"")
+        
     if not items:
         lines.append("\n*No changes detected in the specified timeframe.*")
     else:
@@ -329,10 +331,9 @@ def generate_markdown(items, start_dt, end_dt, org, project_number, output_path)
 
         for item in items:
             repo = item['repo']
-            state_icon = "🟣" if item['state'] == 'open' else "✅"
-            
+                        
             # New format: Title first, then Repo/Number link
-            issue_cell = f"**{item['title']}**<br>{state_icon} [{repo}#{item['number']}]({item['url']})"
+            issue_cell = f"**{item['title']}**<br>[{repo}#{item['number']}]({item['url']})"
             
             change_log = "<br>".join(item['changes'])
             lines.append(f"| {issue_cell} | **{item['status']}** | {change_log} |")
