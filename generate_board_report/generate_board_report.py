@@ -3,7 +3,7 @@ import sys
 import argparse
 import json
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, timezone, time
 from pathlib import Path
 
 # 3rd party library
@@ -33,8 +33,7 @@ def parse_time_arg(time_str, target_date):
     # Create valid datetime from date + time
     try:
         hour, minute = map(int, time_str.split(':'))
-        # Combine date and time, assuming local time
-        dt = datetime.combine(target_date, datetime.min.time()).replace(hour=hour, minute=minute)
+        dt = datetime.combine(target_date, time(hour=hour, minute=minute))
         return dt.astimezone() # Ensure it's aware (local system time)
     except ValueError:
         logger.error(f"Invalid time format: {time_str}. Use HH:MM.")
