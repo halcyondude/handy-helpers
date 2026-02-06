@@ -4,9 +4,9 @@ A Python script to generate a change log for a GitHub Project Board. It's useful
 
 ## Prerequisites
 
-*   Python 3.10+
-*   [`uv`](https://github.com/astral-sh/uv) (recommended)
-*   [`gh` CLI](https://cli.github.com/) authenticated
+* Python 3.10+
+* [`uv`](https://github.com/astral-sh/uv) (recommended)
+* [`gh` CLI](https://cli.github.com/) authenticated
 
 ## Authentication
 
@@ -65,11 +65,11 @@ options:
 
 ## How It Works
 
-1.  **Fetches Data**: Uses the GitHub GraphQL API to fetch *all* items from the project board.
-2.  **Filters**: Processes items to find events (added, moved, labeled, commented) within the specified `--start` and `--end` time window.
-3.  **Outputs**:
-    *   **JSON**: Dumps raw API data to `board_data_YYYY-MM-DD.json` (unless disabled).
-    *   **Markdown**: Writes a formatted report to `board_report_YYYY-MM-DD.md`.
+1. **Fetches Data**: Uses the GitHub GraphQL API to fetch *all* items from the project board.
+2. **Filters**: Processes items to find events (added, moved, labeled, commented) within the specified `--start` and `--end` time window.
+3. **Outputs**:
+    * **JSON**: Dumps raw API data to `board_data_YYYY-MM-DD.json` (unless disabled).
+    * **Markdown**: Writes a formatted report to `board_report_YYYY-MM-DD.md`.
 
 ### GraphQL Query
 
@@ -91,7 +91,7 @@ query($org: String!, $number: Int!, $cursor: String) {
           updatedAt # When the CARD was moved/edited
           createdAt # When the CARD was added to board
           
-          fieldValues(first: 10) {
+          fieldValues(first: 20) {
             nodes {
               ... on ProjectV2ItemFieldSingleSelectValue {
                 name
