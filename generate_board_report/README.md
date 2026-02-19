@@ -22,17 +22,27 @@ gh auth refresh -h github.com -s read:project
 
 ## Usage
 
-Running with `uv` (auto-manages venv and dependencies):
+Running with `uv` (newer/faster way to manage dependencies):
+
+First, create a virtual env.
+
+```bash
+cd generate_board_report
+uv venv && source .venv/bin/activate
+
+# NOTE: uv doesn't install pip and setuptools in the venv, running "uv pip install" is required if using this method (vs. python3 -m venv, which makes a bigger venv)
+uv pip install -r requirements.txt
+```
 
 ```bash
 # Generate report for today's meeting (UTC/Local auto-handled)
-uv run python3 generate_board_report.py --start 11:00
+./generate_board_report.py --start 11:00
 
 # Generate report for a specific past date
-uv run python3 generate_board_report.py --date 2026-02-05 --start 11:00 --end 12:30
+./generate_board_report.py --date 2026-02-05 --start 11:00 --end 12:30
 
 # Full options
-uv run python3 generate_board_report.py --help
+./generate_board_report.py --help
 ```
 
 ### Command Help
