@@ -280,7 +280,7 @@ def process_items(items, start_time, end_time):
             for comment in content['comments']['nodes']:
                 c_time = parse_gh_dt(comment['createdAt'])
                 if start_utc <= c_time <= end_utc:
-                    snippet = comment['bodyText'][:120].replace('\n', ' ')
+                    snippet = comment['bodyText'][:400].replace('\n', ' ')
                     changes.append(f"💬 Comment (@{comment['author']['login']}): \"{snippet}...\"")
 
         # 4. Board Moves (Implicit)
